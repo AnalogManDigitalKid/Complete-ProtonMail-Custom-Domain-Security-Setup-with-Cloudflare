@@ -439,11 +439,11 @@ Monitor your Cloudflare DMARC management dashboard for authentication reports an
 **MTA-STS not working:**
 - Verify the worker route matches exactly: `mta-sts.yourdomain.com/*`
 - Check that the AAAA record has the proxy enabled
+- Test that `https://mta-sts.yourdomain.com/.well-known/mta-sts.txt` returns content
 
 **WKD not working:**
 - Confirm both routes are configured correctly
 - Verify DNS records have proxy enabled
-- Test that `https://yourdomain.com/.well-known/openpgpkey/policy` returns content
 
 **Worker errors:**
 - Check browser developer tools for JavaScript errors

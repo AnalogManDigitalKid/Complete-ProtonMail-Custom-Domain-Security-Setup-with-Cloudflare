@@ -142,8 +142,6 @@ MTA-STS enforces TLS encryption for email transport, while TLS-RPT provides repo
 
 **Goal:** Create a Cloudflare worker to handle and serve MTA-STS.txt policy files for multiple domains.
 
-**Note:** MTA-STS cannot be set up for subdomains (e.g., `mail.example.com`) on Cloudflare's free plan, as multi-level subdomains do not receive free SSL certificates. Setting up MTA-STS for `mail.example.com` would require an SSL certificate covering `mta-sts.mail.example.com`, which requires a paid Cloudflare plan or custom SSL certificate. More info here: https://developers.cloudflare.com/ssl/edge-certificates/additional-options/total-tls/error-messages/#active-domains
-
 #### Step 1: Create the Worker
 
 1. Navigate to **Account Home > Compute (Workers) > Workers & Pages**
@@ -277,6 +275,8 @@ For each domain, create these DNS records:
 - Replace `xxxxxxxxxx` with current epoch timestamp from https://www.epochconverter.com/
 - Replace `postmaster@example.com` with your email for TLS-RPT reports
 - The `id` must be changed whenever you modify the MTA-STS policy in the worker
+
+> **Note:** MTA-STS cannot be set up for subdomains (e.g., `mail.example.com`) on Cloudflare's free plan, as multi-level subdomains do not receive free SSL certificates. Setting up MTA-STS for `mail.example.com` would require an SSL certificate covering `mta-sts.mail.example.com`, which requires a paid Cloudflare plan or custom SSL certificate. More info here: https://developers.cloudflare.com/ssl/edge-certificates/additional-options/total-tls/error-messages/#active-domains
 
 ### 7. WKD (Web Key Directory)
 

@@ -54,13 +54,13 @@ SPF prevents other people from sending emails on behalf of your domain by defini
 
 | Type | Host | Value                                    |
 | ---- | ---- | ---------------------------------------- |
-| TXT  | @    | `v=spf1 include:_spf.protonmail.ch ~all` |
+| TXT  | @    | `v=spf1 include:_spf.protonmail.ch -all` | 
 
-![](https://raw.githubusercontent.com/AnalogManDigitalKid/Complete-ProtonMail-Custom-Domain-Security-Setup-with-Cloudflare/refs/heads/main/images/Untitled%20picture.png)
+![](/images/Untitled%20picture.png)
 
 **For multiple email services**, include additional domains:
 ```
-v=spf1 include:_spf.protonmail.ch include:spf.example.com ~all
+v=spf1 include:_spf.protonmail.ch include:spf.example.com -all
 ```
 
 ### 2. DKIM (DomainKeys Identified Mail)
@@ -91,9 +91,11 @@ DMARC uses SPF and DKIM to determine what happens to emails that fail authentica
 
 | Type | Host | Value |
 |------|------|-------|
-| TXT | _dmarc | `v=DMARC1; p=quarantine` |
+| TXT | _dmarc | `"v=DMARC1; p=reject; sp=reject; pct=100; adkim=s; aspf=s; fo=1; ri=86400; ruf=mailto:example@example.com"` |
 
-![](https://raw.githubusercontent.com/AnalogManDigitalKid/Complete-ProtonMail-Custom-Domain-Security-Setup-with-Cloudflare/refs/heads/main/images/Untitled%20picture5.png)
+> **Note**: Specify instead of example email your own. If you do not want to get reports, you can remove ruf part from the record.
+
+![](/images/Untitled%20picture5.png)
 
 **Enable DMARC Management in Cloudflare:**
 
@@ -124,17 +126,20 @@ CAA records specify which Certificate Authorities are authorized to issue certif
 
 **DNS Records to Create:**
 
-| Type | Host | Value |
-|------|------|-------|
-| CAA | @ | `0 issue google.com` |
-| CAA | @ | `0 issue letsencrypt.org` |
-| CAA | @ | `0 issue sectigo.com` |
+CAA (Certificate Authority Authorization) records allow a domain owner to specify which Certificate Authorities (CAs) are permitted to issue certificates for their domain. They help prevent unauthorized or fraudulent SSL/TLS certificate issuance.
 
-![](https://raw.githubusercontent.com/AnalogManDigitalKid/Complete-ProtonMail-Custom-Domain-Security-Setup-with-Cloudflare/refs/heads/main/images/Untitled%20picture9.png)
+In your setup you are adding two specific CAA records:
 
-![](https://raw.githubusercontent.com/AnalogManDigitalKid/Complete-ProtonMail-Custom-Domain-Security-Setup-with-Cloudflare/refs/heads/main/images/Untitled%20picture10.png)
+| Type | Host | Value | Purpose |
+|------|------|-------|---------|
+| CAA | @ | `0 issuemail ;` | Explicitly blocks issuance of S/MIME (email) certificates by any CA. This ensures that no Certificate Authority is allowed to issue email-related certificates for your domain unless you add additional authorized ones. |
+| CAA | @ | `0 iodef mailto:me@example.com` | Provides an email address where CAs can send reports if someone attempts to request an unauthorized certificate (either email or SSL). This allows you to be notified of suspicious activity. |
 
-> **Note**: Add CAA records for each Certificate Authority you want to authorize. The above covers most Cloudflare use cases.
+![](/images/Untitled%20picture9.png)
+
+![](/images/Untitled%20picture10.png)
+
+> **Note**: After you add your custom CAA records, Cloudflare automatically inserts additional CAA entries for the Certificate Authorities it uses to issue SSL certificates for your domain (e.g., Let’s Encrypt, Google Trust Services, or other CAs Cloudflare partners with). This happens because Cloudflare manages your TLS certificates, and it must ensure that its authorized CAs are allowed to issue certificates for your domain. Note, these entries will not appear in your Cloudflare DNS dashboard. This is expected behavior—Cloudflare manages those records internally to ensure its certificate authorities (such as Let’s Encrypt or Google Trust Services) remain authorized.
 
 ### 6. MTA-STS and TLS-RPT
 
@@ -270,6 +275,8 @@ For each domain, create these DNS records:
 | AAAA | mta-sts | `100::` | Enabled |
 | TXT | _mta-sts | `v=STSv1; id=xxxxxxxxxx` | N/A |
 | TXT | _smtp._tls | `v=TLSRPTv1; rua=mailto:postmaster@example.com` | N/A |
+| TXT | mta-sts | `v=spf1 -all` | N/A |
+| MX | mta-sts | `.` | N/A |
 
 **Important Notes:**
 - Replace `xxxxxxxxxx` with current epoch timestamp from https://www.epochconverter.com/
@@ -378,11 +385,14 @@ For each domain, create these DNS records:
 |------|------|-------|--------|
 | A | @ | `192.0.2.1` | Enabled |
 | CNAME | openpgpkey | @ | Enabled |
+| MX | openpgpkey | `.` | N/A |
+| TXT | openpgpkey | `v=spf1 -all` | N/A |
 
 **Notes:**
 - The A record value can be any IP address, including your actual web host
 - `192.0.2.1` is a non-routable IP if you don't host a website
 - The proxy setting is required for Cloudflare to intercept and route traffic
+- MX and TXT records required for protecting subdomain from spoofing
 
 #### Step 5: Block Homepage Traffic (Optional)
 
@@ -398,11 +408,18 @@ If you don't host a website at your domain root, create a worker to prevent time
 export default {
   async fetch(request) {
     const url = new URL(request.url);
-    // Block homepage/root "/"
     if (url.pathname === "/" || url.pathname === "") {
-      return new Response('Not Found', { status: 404 });
+      return new Response('Not Found', { 
+        status: 404,
+        headers: {
+          'Content-Security-Policy': "default-src 'none'; frame-ancestors 'none';",
+          'X-Content-Type-Options': 'nosniff',
+          'X-Frame-Options': 'DENY',
+          'X-XSS-Protection': '0',
+          'Referrer-Policy': 'no-referrer'
+        }
+      });
     }
-    // Let everything else proceed as normal
     return await fetch(request);
   }
 }

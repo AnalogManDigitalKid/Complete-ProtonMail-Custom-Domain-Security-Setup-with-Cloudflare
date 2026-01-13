@@ -316,7 +316,7 @@ Click **Edit code** and use the following:
 //    -     CNAME   openpgpkey   @           proxied
 // 6. If a domain does not host a website at the root A record (aka you set the IP to 192.0.2.1), then add a route inside the block-homepage-traffic worker.
 // 7. Verify that it is working with https://metacode.biz/openpgp/web-key-directory
-//    - Use these instead: https://wkd.chimbosonic.com/ (open-source) or webkeydirectory.com (proprietary)
+//    - Use these instead: https://wkd.dp42.dev (open-source) or webkeydirectory.com (proprietary)
 
 export default {
   async fetch(request, env, ctx) {
@@ -439,7 +439,7 @@ Visit https://www.hardenize.com/ and search your domain. You should see all secu
 
 ### WKD Testing
 Test Web Key Directory functionality:
-- **Open Source**: https://wkd.chimbosonic.com/
+- **Open Source**: ~~https://wkd.chimbosonic.com/~~ https://wkd.dp42.dev
 - **Proprietary**: https://www.webkeydirectory.com/
 
 Enter an email address with your custom domain:

@@ -242,7 +242,7 @@ For each domain, add a route:
 
 #### Step 4: Configure WAF Rules
 
-On each domain, navigate to **Security > WAF > Custom rules**
+On each domain, navigate to **Security > Security rules**
 
 1. Create rule named "Disabling Browser Integrity Check for MTA-STS"
 2. Click "edit expression" and paste:

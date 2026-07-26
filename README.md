@@ -77,11 +77,11 @@ DKIM adds a digital signature to your emails that receiving servers can verify.
 
 > **Note**: Get your specific ProtonMail DKIM values from your ProtonMail domain settings.
 
-![](https://raw.githubusercontent.com/AnalogManDigitalKid/Complete-ProtonMail-Custom-Domain-Security-Setup-with-Cloudflare/refs/heads/main/images/Untitled%20picture2.png)
+![](/images/Untitled%20picture2.png)
 
-![](https://raw.githubusercontent.com/AnalogManDigitalKid/Complete-ProtonMail-Custom-Domain-Security-Setup-with-Cloudflare/refs/heads/main/images/Untitled%20picture3.png)
+![](/Untitled%20picture3.png)
 
-![](https://raw.githubusercontent.com/AnalogManDigitalKid/Complete-ProtonMail-Custom-Domain-Security-Setup-with-Cloudflare/refs/heads/main/images/Untitled%20picture4.png)
+![](/images/Untitled%20picture4.png)
 
 ### 3. DMARC (Domain-based Message Authentication, Reporting & Conformance)
 
@@ -91,9 +91,18 @@ DMARC uses SPF and DKIM to determine what happens to emails that fail authentica
 
 | Type | Host | Value |
 |------|------|-------|
-| TXT | _dmarc | `"v=DMARC1; p=reject; sp=reject; pct=100; adkim=s; aspf=s; fo=1; ri=86400; ruf=mailto:example@example.com"` |
+| TXT | _dmarc | `"v=DMARC1; p=reject; adkim=s; aspf=s; fo=1; rua=mailto:example@example.com; ruf=mailto:example@example.com"` |
 
-> **Note**: Specify instead of example email your own. If you do not want to get reports, you can remove ruf part from the record.
+**DMARC Tags:**
+
+1. `v=DMARC1` Versioning, required as first tag, this is the only valid value
+2. `p=reject` Policy specifies what receiver should do with a message that fails authentication. Valid values are Reject, Quarantine, None
+3. `adkim=s` DKIM Alignment, valid values are s (strict) and r (relaxed); strict requires exact match of DKIM signing domain and the header from domain to pass, relaxed mode considers only that the organizational (apex) domain registered with a registrar to match the author's organizationl domain for DKIM to pass
+4. `aspf=s` SPF Alignment, valid values are s (strict) and r (relaxed), with the same behavior as the 'adkim' tag
+5. `fo=1` Failure Reporting Options, valid values are 0,1,s,d - 0 generates a report when both SPF and DKIM fail, 1 generates a report when either fail, s generates a report for SPF failure only, and d generates a report for DKIM failure only
+6. `rua=mailto:example@example.com` RUA specifies the URI to which aggregate dmarc reports should be sent - this is a summary of all messages received by the receiver from your domain. If the domain for reporting is not the same as the domain the policies applies to, an additional External Validation record will need to be created in the reporting domain's DNS records domain is not the same as
+7. `ruf=mailto:example@example.com` RUF specifies the URI to which  forensic failure reports should be sent - this is a detailed examination of messages that failed the authentication methods specified in the 'fo' tag. This report is optional for receivers, and very few providers send these today due to privacy and PII concerns.
+
 
 ![](/images/Untitled%20picture5.png)
 
@@ -102,23 +111,23 @@ DMARC uses SPF and DKIM to determine what happens to emails that fail authentica
 1. Navigate to: **Your domain > Email > DMARC Management**
 2. Enable DMARC management
 
-![](https://raw.githubusercontent.com/AnalogManDigitalKid/Complete-ProtonMail-Custom-Domain-Security-Setup-with-Cloudflare/refs/heads/main/images/Untitled%20picture6.png)
+![](/Untitled%20picture6.png)
 
-![](https://raw.githubusercontent.com/AnalogManDigitalKid/Complete-ProtonMail-Custom-Domain-Security-Setup-with-Cloudflare/refs/heads/main/images/Untitled%20picture7.png)
+![](/Untitled%20picture7.png)
 
 3. Click **Next** and allow the updates
 
-This enables you to receive reports when emails are quarantined by DMARC policies.
+This will fill the 'rua' tag with a Cloudflare generated address, after which Cloudflare will collect all delivered reports and provide a dashboard to view aggregated DMARC results. The rua tag supports multiple values comma separated, which allows you to receive reports at your address in addition to Cloudflare's if desired
 
 ### 4. DNSSEC and DANE
 
-DNSSEC secures DNS queries, and DANE binds TLS certificates to domain names. To enable DANE on ProtonMail, simply enable DNSSEC.
+DNSSEC secures DNS queries, and DANE binds TLS certificates to domain names. To enable DANE on ProtonMail, simply enable DNSSEC within Cloudflare.
 
 **Steps:**
 1. Navigate to: **Account Home > Domain Registration > Manage Domains > Your Domain > Manage > Configuration**
 2. Enable DNSSEC
 
-![](https://raw.githubusercontent.com/AnalogManDigitalKid/Complete-ProtonMail-Custom-Domain-Security-Setup-with-Cloudflare/refs/heads/main/images/Untitled%20picture8.png)
+![](/images/Untitled%20picture8.png)
 
 ### 5. CAA (Certification Authority Authorization)
 
@@ -158,7 +167,7 @@ MTA-STS enforces TLS encryption for email transport, while TLS-RPT provides repo
 
 Click **Edit code** and use the following:
 
-![](https://raw.githubusercontent.com/AnalogManDigitalKid/Complete-ProtonMail-Custom-Domain-Security-Setup-with-Cloudflare/refs/heads/main/images/Untitled%20picture11.png)
+![](/images/Untitled%20picture11.png)
 
 ```javascript
 // This worker is designed to handle MTA-STS policies for multiple domains.
@@ -300,7 +309,7 @@ WKD enables automatic discovery of PGP public keys, making encrypted email easie
 
 Click **Edit code** and use the following:
 
-![](https://raw.githubusercontent.com/AnalogManDigitalKid/Complete-ProtonMail-Custom-Domain-Security-Setup-with-Cloudflare/refs/heads/main/images/Untitled%20picture11.png)
+![](/images/Untitled%20picture11.png)
 
 ```javascript
 // 1. Create a worker in the dashboard and paste the following code into it
@@ -398,7 +407,7 @@ For each domain, create these DNS records:
 
 If you don't host a website at your domain root, create a worker to prevent timeout errors:
 
-![](https://raw.githubusercontent.com/AnalogManDigitalKid/Complete-ProtonMail-Custom-Domain-Security-Setup-with-Cloudflare/refs/heads/main/images/Untitled%20picture12.png)
+![](/images/Untitled%20picture12.png)
 
 1. Navigate to **Account Home > Compute (Workers) > Workers & Pages**
 2. Create a new worker named "Block-homepage-traffic"
@@ -435,7 +444,7 @@ export default {
 ### Comprehensive Security Analysis
 Visit https://www.hardenize.com/ and search your domain. You should see all security features properly configured:
 
-![](https://raw.githubusercontent.com/AnalogManDigitalKid/Complete-ProtonMail-Custom-Domain-Security-Setup-with-Cloudflare/refs/heads/main/images/Untitled%20picture13.png)
+![](/images/Untitled%20picture13.png)
 
 ### WKD Testing
 Test Web Key Directory functionality:
@@ -444,9 +453,9 @@ Test Web Key Directory functionality:
 
 Enter an email address with your custom domain:
 
-![](https://raw.githubusercontent.com/AnalogManDigitalKid/Complete-ProtonMail-Custom-Domain-Security-Setup-with-Cloudflare/refs/heads/main/images/Untitled%20picture14.png)
+![](/images/Untitled%20picture14.png)
 
-![](https://raw.githubusercontent.com/AnalogManDigitalKid/Complete-ProtonMail-Custom-Domain-Security-Setup-with-Cloudflare/refs/heads/main/images/Untitled%20picture15.png)
+![](/images/Untitled%20picture15.png)
 
 ### DMARC Reports
 Monitor your Cloudflare DMARC management dashboard for authentication reports and any potential abuse attempts.

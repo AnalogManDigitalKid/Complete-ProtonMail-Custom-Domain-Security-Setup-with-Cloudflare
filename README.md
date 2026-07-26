@@ -111,9 +111,9 @@ DMARC uses SPF and DKIM to determine what happens to emails that fail authentica
 1. Navigate to: **Your domain > Email > DMARC Management**
 2. Enable DMARC management
 
-![](/Untitled%20picture6.png)
+![](/images/Untitled%20picture6.png)
 
-![](/Untitled%20picture7.png)
+![](/images/Untitled%20picture7.png)
 
 3. Click **Next** and allow the updates
 

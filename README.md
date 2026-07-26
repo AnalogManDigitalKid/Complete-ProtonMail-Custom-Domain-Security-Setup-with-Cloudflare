@@ -79,7 +79,7 @@ DKIM adds a digital signature to your emails that receiving servers can verify.
 
 ![](/images/Untitled%20picture2.png)
 
-![](/Untitled%20picture3.png)
+![](/images/Untitled%20picture3.png)
 
 ![](/images/Untitled%20picture4.png)
 

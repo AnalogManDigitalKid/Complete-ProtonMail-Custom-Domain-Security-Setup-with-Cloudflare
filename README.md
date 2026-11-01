@@ -270,13 +270,13 @@ On each domain, navigate to **Rules > Overview**
 
 For each domain, create these DNS records:
 
-| Type | Host | Value | Proxy |
-|------|------|-------|--------|
-| AAAA | mta-sts | `100::` | Enabled |
-| TXT | _mta-sts | `v=STSv1; id=xxxxxxxxxx` | N/A |
-| TXT | _smtp._tls | `v=TLSRPTv1; rua=mailto:postmaster@example.com` | N/A |
-| TXT | mta-sts | `v=spf1 -all` | N/A |
-| MX | mta-sts | `.` | N/A |
+| Type | Host | Value | Proxy | Priority |
+|------|------|-------|--------|--------|
+| AAAA | mta-sts | `100::` | Enabled | N/A |
+| TXT | _mta-sts | `v=STSv1; id=xxxxxxxxxx` | N/A | N/A |
+| TXT | _smtp._tls | `v=TLSRPTv1; rua=mailto:postmaster@example.com` | N/A | N/A |
+| TXT | mta-sts | `v=spf1 -all` | N/A | N/A |
+| MX | mta-sts | `.` | N/A | 0 |
 
 **Important Notes:**
 - Replace `xxxxxxxxxx` with current epoch timestamp from https://www.epochconverter.com/
